@@ -264,11 +264,10 @@ format:
 
 -   With thanks to Debbie Moon, Chelsea Scott, Nicola Stubbs, Laura Burton, Warren Davies and Jen Struthers
 
--   Code is available at <https://github.com/ruth-keane-nhs/openxlsx2_nhsr>
 :::
 :::
 
 ::: {.column width="50%"}
-[![](images/qr%20code.png){fig-alt="QR code linking to https://github.com/ruth-keane-nhs/openxlsx2_nhsr"}](https://github.com/ruth-keane-nhs/openxlsx2_nhsr)
+
 :::
 :::
