@@ -1,0 +1,274 @@
+---
+title: "I'm an opensource girl in an excel world - the benefits of openxlsx2"
+format: 
+  pptx:
+    reference-doc: 
+      template.pptx
+---
+
+# Introduction
+
+## Why use RAP?
+
+-   RAP- reproducible analytical pipelines (<https://nhsdigital.github.io/rap-community-of-practice/>)
+-   Code sharing and re-use can reduce workload
+-   Often less error prone
+-   We can build in tests to our process
+-   Version control can improve QA process
+
+## Use of Excel in public services
+
+-   Excel use very common
+
+-   Accessible and quick way for people without coding skills to do basic analysis and view data
+
+-   Can store data with some formatting and visualisation
+
+-   Complex analysis in excel is possible but error prone and time-consuming.
+
+-   **People very often want to continue to have excel output**
+
+## Examples
+
+::: columns
+::: {.column width="50%"}
+![](images/screenshot_diagnostic.png){fig-alt="Screenshot from NHS England's website. The title of the page is Diagnostic Imaging Dataset 2024-25 Data. The Page features a number of hyperlinks to different excel spreadsheets."}
+:::
+
+::: {.column width="50%"}
+![](images/screenshot_education.png){fig-alt="Screenshot from the Office for National Statistics. The title of the page is Public service productivity estimates: eduction. The page featrues a hyperlink to an excel spreadsheet containing the data."}
+:::
+:::
+
+## Creating excel from R
+
+-   writexl - simple, quick running time, limited formatting options
+-   xlsx - requires Java, so setup can be tricky
+-   XLConnect - requires Java, so setup can be tricky
+-   openxlsx - does not require Java, advanced formatting options
+-   **openxlsx2 - does not require Java, upgrade to openxlsx with slightly more functionality**
+-   Note- this is possible in python too (e.g. xlsxwriter)
+
+## openxlsx2
+
+-   Key features:
+    -   using templates
+    -   add formulae to cells
+    -   conditional formatting (including icons)
+    -   pivot tables
+    -   plots and images
+    -   complex styling
+
+## When to consider openxslx/openxlsx2
+
+::: columns
+::: {.column width="50%"}
+-   Well suited when:
+
+    -   Part of reproducible analytical pipeline
+
+    -   Output needs to be excel
+
+    -   Output has complex formatting requirements
+
+    -   Analysis will need to be repeated
+:::
+
+::: {.column width="50%"}
+-   Might not be worth it if:
+
+    -   Very complex spreadsheet that only needs to be created once
+
+    -   Nice formatting not required (csv)
+
+    -   An alternative output type is more appropriate
+:::
+:::
+
+# How to use openxlsx2
+
+## How to use (basic example)?
+
+-   piping syntax- these functions do not modify in place
+    -   code:
+
+        `wb<-wb_workbook()`
+
+        `wb<-wb |>`
+
+        `wb_add_worksheet(tab_name,tab_color = wb_color("blue")) |>`
+
+        `wb_add_data(tab_name,iris) |>`
+
+        `wb_add_font(tab_name, dimensions_heading, name="Calibri", size = 11, bold = "single", color=wb_color("navy") ) |>`
+
+        `wb_add_fill(tab_name, dimensions_heading,color = wb_color("beige")) |>`
+
+        `wb_add_border(tab_name, dimensions_heading) |>`
+
+        `wb_set_col_widths(tab_name, cols = 1:5, widths=c(10,10,10,10,20))`
+
+        `wb_save(wb,"simple_demo.xlsx", overwrite = TRUE)`
+
+## How to use (basic example)?
+
+-   chaining syntax - these functions modify in place
+    -   code:
+
+        `wb<-wb_workbook()`
+
+        `wb $`
+
+        `add_worksheet(tab_name,tab_color = wb_color("blue")) $`
+
+        `add_data(tab_name,iris)$`
+
+        `add_font(tab_name, dimensions_heading, name="Calibri", size = 11, bold = "single", color=wb_color("navy") ) $`
+
+        `add_fill(tab_name, dimensions_heading,color = wb_color("beige")) $`
+
+        `add_border(tab_name, dimensions_heading)`
+
+        `wb$save("simple_demo.xlsx", overwrite = TRUE)`
+
+## Simple demo
+
+![](images/basic_screenshot.png){fig-alt="Screenshot of the excel spreadsheet which the code on the previous slides created. The \"iris\" dataframe has been printed. The title row has a beige background and the text is blue and bold."}
+
+## Building up complexity
+
+-   What about more complex document designs?
+
+-   If we want to format the main body differently, we will need to repeat add_font, add_border and add_fill with different dimensions
+
+-   We can use functions to build complex reports.
+
+## More complex reports
+
+![](images/tab_1_cropped.png){fig-alt="Screenshot of formatted excel spreadsheet. The data is from the mtcars built in dataset in R. There is a title section at the top of the spreadsheet with a date. The first two column names are in black font with a dark grey background.  The remaining column names have a black font and green background. The data has been conditionally formatted. One section goes between blue and white, the other section has traffic light icons."}
+
+## More complex reports
+
+![](images/tab_1_cropped_sections.png){fig-alt="Screenshot of formatted excel spreadsheet. The data is from the mtcars built in dataset in R. There is a title section at the top of the spreadsheet with a date. The first two column names are in black font with a dark grey background. The remaining column names have a black font and green background. The data has been conditionally formatted. One section goes between blue and white, the other section has traffic light icons. The page has been split into\"title section\", \"row info\" and \"main body\""}
+
+## More complex reports
+
+-   **For loop to create each sheet**
+
+    -   report_sheets is a list containing the parameters and data. Iterate through it, calling write_sheet function
+
+        `wb <- create_new_workbook("code/template_excel.xlsx")`
+
+        `for (sheet in report_sheets) {`
+
+        `wb <- wb |>`
+
+        `write_sheet(`
+
+        `sheet_info = sheet$sheet_params,`
+
+        `data_list = sheet$data,`
+
+        `date_to_print = date_running ) }`
+
+        `wb_save(wb, "demo.xlsx", overwrite = TRUE)`
+
+## `write_sheet` function
+
+-   **Build up the sheet**
+
+    -   Create the sheet then add each section sequentially:
+
+        `wb <-`
+
+        `create_new_sheet(wb, sheet_info$tab_name, style_info$sheet_colour) |>`
+
+        `add_title_section(sheet_info$tab_name, dimensions$title_dimensions,title_text) |>`
+
+        `add_row_info_section(sheet_info$tab_name,  dimensions$row_info_dimensions, data_list$row_info) |>`
+
+        `add_main_body(  sheet_name = sheet_info$tab_name, main_data = data_list$main_data,  main_dimensions = dimensions$main_dimensions, style_name = style_info$sheet_style )`
+
+## `add_main_body` function
+
+-   **Add style elements that apply to all main body sections, then call functions to add specific styling**
+
+    -   This allows us to keep consistent formatting apart from main body of sheet
+
+    -   Specific styling:
+
+        `if (style_name == "conditional_format_all") {`
+
+        `wb <- wb |> add_main_style_conditional_format_all( sheet_name, main_dimensions, main_data )`
+
+        `} else if (style_name == "months_with_total") {`
+
+        `wb <- wb |> add_main_style_months_with_total(sheet_name, main_dimensions)`
+
+## Sheets with different styles
+
+![](images/tab_1.png){fig-alt="Screenshot of formatted excel spreadsheet. The data is from the mtcars built in dataset in R. There is a title section at the top of the spreadsheet with a date. The first two column names are in black font with a dark grey background.  The remaining column names have a black font and green background. The data has been conditionally formatted. One section goes between blue and white, the other section has traffic light icons."}
+
+## Sheets with different styles
+
+![](images/tab_2.png){fig-alt="Screenshot of formatted excel spreadsheet. The data is from the AirPassengers built in dataset in R. There is a title section at the top of the spreadsheet with a date. The first column name is in black font with a dark grey background.  The remaining column names have a black font and pale blue background, apart from the final total column, which has a dark blue background.."}
+
+## Other functions
+
+-   \~ 20 functions to create this demo
+
+    -   wrappers to `wb_workbook` and `add_worksheet`
+
+        -   `create_new_sheet`, `create_new_workbook`
+
+    -   functions to create each section
+
+        -   `add_title_section`,`add_main_body`, `add_row_info_section`
+
+        functions to get dimensions for all sections
+
+        -   `get_data_position`
+
+    -   functions for each style type of main body
+
+        -   `add_main_style_months_with_total, etc`
+
+    -   additional styling functions which are used by other functions
+
+        -   `format_row_info`, `add_colour_headings`, `add_conditional_formatting`
+
+## Open source spreadsheets - ODS?
+
+-   readODS allows you to write to ODS but text formatting is not possible
+
+-   You can use openxlsx/openxlsx2 to create an excel file then convert to ODS from within excel or within R.
+
+    -   [department-for-transport/odsconvertr](https://github.com/department-for-transport/odsconvertr.git){.uri}
+
+    -   code:
+
+        `devtools::install_github("department-for-transport/odsconvertr")`
+
+        `library(odsconvertr)`
+
+        `convert_to_ods("demo.xlsx")`
+
+    -   note, functionality limited - e.g. conditional formatting will dissapear
+
+## Adknowledgements
+
+::: columns
+::: {.column width="50%"}
+::: columns
+-   This work was based on a project with NHS England- Elective Analysis and RAP teams
+
+-   With thanks to Debbie Moon, Chelsea Scott, Nicola Stubbs, Laura Burton, Warren Davies and Jen Struthers
+
+-   Code is available at <https://github.com/ruth-keane-nhs/openxlsx2_nhsr>
+:::
+:::
+
+::: {.column width="50%"}
+[![](images/qr%20code.png){fig-alt="QR code linking to https://github.com/ruth-keane-nhs/openxlsx2_nhsr"}](https://github.com/ruth-keane-nhs/openxlsx2_nhsr)
+:::
+:::
