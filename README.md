@@ -23,9 +23,3 @@ This code was created for the purpose of demonstrating how openxlsx2 can be used
         -   `non_openxlsxs2_functions.R` - helper functions that use data and parameters to get the dimensions of each part of the worksheet, create the text for the title section, and create the ranges for conditional formatting
 
 -   `outputs/` - excel and ods outputs
-
--   `images/` - folder with screenshots and images used in presentation
-
--   `presentation.qmd` - quarto file to create presentation (simple version)
-
--   `template.pptx` - powerpoint template file (with AGEM AAU styling)
